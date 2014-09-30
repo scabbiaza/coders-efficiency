@@ -10,6 +10,7 @@ Commercial projects oriented.
 
 * [GitInspector](https://code.google.com/p/gitinspector/)
 * [GitStats](https://github.com/hoxu/gitstats/blob/master/gitstats)
+* [GitFame](https://github.com/oleander/git-fame-rb)
 
 
 ### Contribution
