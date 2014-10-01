@@ -41,6 +41,7 @@ conf = {
     'ignore': ['*.md', '2.py'],
     'min_days': 0,
     'min_loc': 100,
+    'anonym': True,
 }
 
 
@@ -128,8 +129,10 @@ if __name__ == '__main__':
 
     print("{:<10}{:>20}{:>20}{:>20}{:>20}"
           .format('Author', 'LOC total', 'Working days', 'Contribution, %', 'Efficiency'))
+    i = 0
     for author_name, author in authors.iteritems():
-        print("{:<10}{:>20}{:>20}{:>20.2%}{:>20.2}".format(author_name, author['loc'], author['days'], author['contribution'], author['efficiency']))
+        i += 1
+        print("{:<10}{:>20}{:>20}{:>20.2%}{:>20.2}".format(author_name if not conf['anonym'] else 'Developer %d' % i, author['loc'], author['days'], author['contribution'], author['efficiency']))
     # print('')
     # print('')
     # print("{:<10}{:>20}{:>20}{:>20}{:>20.2%}".format('Team', team['loc'], team['days'], '', team['efficiency']))
