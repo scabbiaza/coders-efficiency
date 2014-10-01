@@ -35,6 +35,7 @@ from collections import OrderedDict
 
 conf = {
     'repo_path': None,
+    'min_days': 22,
 }
 
 
@@ -68,6 +69,10 @@ def get_authors_stat():
     result = execute_in_shell("git log --date=short --pretty=\"format:%ad\" | uniq")
     team['days'] = len(result)
 
+    # Exclude authors that worked less then conf['min_days']
+    authors = {author_name: author for author_name, author in authors.iteritems()
+                                   if author['days'] >= conf['min_days']}
+
     # Get author for every line in every file, add this to author statistic
     # Get total LOC
     for file in files:
@@ -97,7 +102,7 @@ def get_authors_stat():
         for author_name in authors:
             authors[author_name]['efficiency'] = potential_loc[author_name] / min_potential_loc
 
-    authors = OrderedDict(sorted(authors.items(), key=lambda x: x[1]['efficiency']))
+    authors = OrderedDict(sorted(authors.items(), key=lambda x: x[1]['efficiency'], reverse=True))
 
     return team, authors
 
