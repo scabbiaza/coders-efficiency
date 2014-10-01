@@ -19,23 +19,28 @@
 #
 # 6. Get total LOC
 #
-# 7. Calculate team's efficiency as:
-#    (total LOC / total working days) / total LOC => percent of the code created per day
+# 7. Calculate team's efficiency (part of the code created per day):
+#    (total LOC / total working days) / total LOC
 #
 # 8. Calculate authors' contribution and efficiency as:
-#    contribution = author LOC / total LOC
-#    efficiency = (author LOC * total working days) / author workink days
+#    contribution = author LOC / total LOC (part of the code created by author)
+#    potential LOC = author LOC per day * total working days
+#    efficiency in team = potential LOC / min potential LOC
 
 
 import os
+import re
 import subprocess
+import fnmatch
 
 from collections import OrderedDict
 
 
 conf = {
     'repo_path': None,
-    'min_days': 22,
+    'ignore': ['*.md', '2.py'],
+    'min_days': 0,
+    'min_loc': 100,
 }
 
 
@@ -58,15 +63,21 @@ def get_authors_stat():
     result = execute_in_shell("git log --format='%aN' | sort -u")
     authors = {item: {'loc': 0, 'days': 0, 'contribution': 0, 'efficiency': 0} for item in result}
 
-    # Get list of not ignored files
+    # Get list of files (except excluded from .gitignore)
     files = execute_in_shell("git ls-files")
 
+    if conf['ignore']:
+        for ignore in conf['ignore']:
+            files = set(files) - set([file for file in files if fnmatch.fnmatchcase(file, ignore)])
+    files = sorted(files)
+
     # Get working days for every author
-    # Get total working days
-    result = execute_in_shell("git log --date=short --pretty=\"format:%ad %an\" | uniq")
+    result = execute_in_shell("git log --date=short --pretty=\"format:%ad %an\" | sort | uniq")
     for author_name in authors:
         authors[author_name]['days'] = len([item for item in result if author_name in item])
-    result = execute_in_shell("git log --date=short --pretty=\"format:%ad\" | uniq")
+
+    # Get total working days
+    result = execute_in_shell("git log --date=short --pretty=\"format:%ad\" | sort | uniq")
     team['days'] = len(result)
 
     # Exclude authors that worked less then conf['min_days']
@@ -83,18 +94,23 @@ def get_authors_stat():
                 authors[author]['loc'] += int(loc)
             team['loc'] += int(loc)
 
+    # Exclude authors that created loc less then conf['min_loc']
+    authors = {author_name: author for author_name, author in authors.iteritems()
+                                   if author['loc'] >= conf['min_loc']}
+
     # Calculate team's efficiency
     team['efficiency'] = (float(team['loc']) / team['days']) / team['loc']
 
-    # Calculate authors' stat
+    # Calculate authors' contribution
     for author_name in authors:
         authors[author_name]['contribution'] = (float(authors[author_name]['loc']) / team['loc'])
 
+    # Calculate authors' potential_loc
     potential_loc = {}
-    for author_name in authors:
-        potential_loc[author_name] = float(authors[author_name]['loc']) * team['days']
+    for author_name, author in authors.iteritems():
+        potential_loc[author_name] = (float(author['loc']) / author['days']) * team['days']
     try:
-        min_potential_loc =min([loc for name, loc in potential_loc.iteritems() if loc > 0])
+        min_potential_loc = min([loc for name, loc in potential_loc.iteritems() if loc > 0])
     except ValueError:
         min_potential_loc = 0
 
@@ -109,8 +125,22 @@ def get_authors_stat():
 
 if __name__ == '__main__':
     team, authors = get_authors_stat()
-    print('team: ', team)
-    print('')
-    for author_name in authors:
-        print(author_name)
-        print(authors[author_name])
+
+    print("{:<10}{:>20}{:>20}{:>20}{:>20}"
+          .format('Author', 'LOC total', 'Working days', 'Contribution, %', 'Efficiency'))
+    for author_name, author in authors.iteritems():
+        print("{:<10}{:>20}{:>20}{:>20.2%}{:>20.2}".format(author_name, author['loc'], author['days'], author['contribution'], author['efficiency']))
+    # print('')
+    # print('')
+    # print("{:<10}{:>20}{:>20}{:>20}{:>20.2%}".format('Team', team['loc'], team['days'], '', team['efficiency']))
+
+
+# def translate(shell_regex):
+#     table = {
+#         '?': '.',
+#         '*': '[\w^/]+',
+#         '**': '[\w]+',
+#     }
+#     for k, v in table.iteritems():
+#         shell_regex = shell_regex.replace(k, v)
+#     return shell_regex
