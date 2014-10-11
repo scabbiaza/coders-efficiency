@@ -1,0 +1,7 @@
+{
+  "name": "Coders' Efficiency",
+  "version": "0.1.0",
+  "dependencies": {
+    "semantic": "https://github.com/Semantic-Org/Semantic-UI/archive/1.0.zip"
+  }
+}
