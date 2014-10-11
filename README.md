@@ -72,12 +72,40 @@ You can see, that contribution and total LOC don't have direct relationship with
 Still for the project all metrics are import.
  
 
-### Important notices
+#### Important notices
  
 * This statistic will have sense only if you analyze release repo. Code should be stable.
 * This script will show you correct results if working day for every coders is the same, for example 8&nbsp;hours per day. That is why script marked as *commercial oriented*. 
 * Any day coder has added commits is count as working day.
 * It's only CODERS' rating. Keep in mind that developers do the other stuff as well: review the code, write documentation and so on. It will not count in this rating and here is why this script was named *Coders' efficiency* and not the *Developers' Efficiency*.
+
+
+
+## How to run
+
+At this moment this is very simple one-file script.
+Download it on your machine, update configurations (in `coders-efficiency.py` file) and run it:
+```
+python coders-efficiency.py
+```
+
+#### Configurations
+
+```python
+conf = {
+    'repo_path': None,
+    'ignore': ['*.md', 'exclude.py'],
+    'min_days': 0,
+    'min_loc': 100,
+    'anonym': True,
+}
+```
+
+`repo_path` – absolute path to your repo. Set `None` if you are going to run script from repo directory.<br/>
+`ignore` – folders and files to ignore. You can put here your dist folders and your vendors.<br/>
+`min_days` – coders that worked less will not show in result rating.<br/>
+`min_loc` – coders that created less LOC will not show in result rating.<br/>
+`anonym` - in this mode real coders' names will be replaced.<br/>
 
 
 
