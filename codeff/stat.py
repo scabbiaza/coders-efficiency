@@ -36,16 +36,7 @@ import fnmatch
 from collections import OrderedDict
 
 
-conf = {
-    'repo_path': None,
-    'ignore': ['*.md', '2.py'],
-    'min_days': 0,
-    'min_loc': 100,
-    'anonym': True,
-}
-
-
-def execute_in_shell(cmd, cwd=conf['repo_path']):
+def execute_in_shell(cmd, cwd=None):
     result = []
     if cwd:
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=cwd)
@@ -57,15 +48,21 @@ def execute_in_shell(cmd, cwd=conf['repo_path']):
     return result
 
 
-def get_authors_stat():
+def get_authors_stat(conf):
+
     team = {'loc': 0, 'days': 0, 'efficiency': 0}
 
+    # Check if folder is under git
+    result = execute_in_shell("find .git", cwd=conf['repo_path'])
+    if 'No such file or directory' in result:
+        exit('Folder is not under Git VCS')
+
     # Get list of authors
-    result = execute_in_shell("git log --format='%aN' | sort -u")
+    result = execute_in_shell("git log --format='%aN' | sort -u", cwd=conf['repo_path'])
     authors = {item: {'loc': 0, 'days': 0, 'contribution': 0, 'efficiency': 0} for item in result}
 
     # Get list of files (except excluded from .gitignore)
-    files = execute_in_shell("git ls-files")
+    files = execute_in_shell("git ls-files", cwd=conf['repo_path'])
 
     if conf['ignore']:
         for ignore in conf['ignore']:
@@ -73,12 +70,12 @@ def get_authors_stat():
     files = sorted(files)
 
     # Get working days for every author
-    result = execute_in_shell("git log --date=short --pretty=\"format:%ad %an\" | sort | uniq")
+    result = execute_in_shell("git log --date=short --pretty=\"format:%ad %an\" | sort | uniq", cwd=conf['repo_path'])
     for author_name in authors:
         authors[author_name]['days'] = len([item for item in result if author_name in item])
 
     # Get total working days
-    result = execute_in_shell("git log --date=short --pretty=\"format:%ad\" | sort | uniq")
+    result = execute_in_shell("git log --date=short --pretty=\"format:%ad\" | sort | uniq", cwd=conf['repo_path'])
     team['days'] = len(result)
 
     # Exclude authors that worked less then conf['min_days']
@@ -88,7 +85,7 @@ def get_authors_stat():
     # Get author for every line in every file, add this to author statistic
     # Get total LOC
     for file in files:
-        result = execute_in_shell("git blame --line-porcelain {} | sed -n 's/^author //p' | sort | uniq -c | sort -rn".format(file))
+        result = execute_in_shell("git blame --line-porcelain {} | sed -n 's/^author //p' | sort | uniq -c | sort -rn".format(file), cwd=conf['repo_path'])
         for item in result:
             loc, author = item.strip().split(' ')[:2]
             if author in authors:
@@ -122,20 +119,6 @@ def get_authors_stat():
     authors = OrderedDict(sorted(authors.items(), key=lambda x: x[1]['efficiency'], reverse=True))
 
     return team, authors
-
-
-if __name__ == '__main__':
-    team, authors = get_authors_stat()
-
-    print("{:<10}{:>20}{:>20}{:>20}{:>20}"
-          .format('Author', 'LOC total', 'Working days', 'Contribution, %', 'Efficiency'))
-    i = 0
-    for author_name, author in authors.iteritems():
-        i += 1
-        print("{:<10}{:>20}{:>20}{:>20.2%}{:>20.2}".format(author_name if not conf['anonym'] else 'Developer %d' % i, author['loc'], author['days'], author['contribution'], author['efficiency']))
-    # print('')
-    # print('')
-    # print("{:<10}{:>20}{:>20}{:>20}{:>20.2%}".format('Team', team['loc'], team['days'], '', team['efficiency']))
 
 
 # def translate(shell_regex):
