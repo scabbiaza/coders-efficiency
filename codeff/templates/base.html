@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="{{ locale() }}">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+{#  TODO:  <link rel="shortcut icon" href="/favicon.gif" type="image/gif"/>#}
+
+    {% block head %}
+        <title>{% block seotitle %}{{ seotitle or pagetitle | default('') | safe }}{% endblock %}</title>
+        <meta name="description" content="{{ seodescription | safe }}"/>
+    {% endblock %}
+
+    {% block styles %}
+        <link rel="stylesheet" href="/static/vendors/semantic/build/packaged/definitions/css/semantic.css">
+        <link rel="stylesheet" href="/static/dist/css/theme.css">
+    {% endblock %}
+</head>
+<body>
+    {% block body %}
+{#        {% include "header.html" %}#}
+        {% block main %}
+            ...
+        {% endblock %}
+{#        {% include "footer.html" %}#}
+
+{#        <div id="alerts">#}
+{#            {% include "alerts.html" %}#}
+{#        </div>#}
+{#        {% include "counters.html" %}#}
+    {% endblock %}
+
+    <script>
+        'use strict';
+        window.pageHandlers = [];
+        window.rebind = function(target) {
+            this.pageHandlers.forEach(function(handler) {
+                handler(target);
+            });
+        }
+    </script>
+
+    {% block scripts %}
+        <script>
+            'use strict';
+            var locale = '{{ locale() }}';
+        </script>
+        <script src="/static/vendors/jquery/dist/jquery.js"></script>
+        <script src="/static/vendors/semantic/build/packaged/definitions/javascript/semantic.js"></script>
+        <script src="/static/dist/js/theme.js"></script>
+    {% endblock %}
+
+    <script>
+        'use strict';
+        window.rebind($(document));
+    </script>
+</body>
+</html>
