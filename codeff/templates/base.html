@@ -12,7 +12,7 @@
     {% endblock %}
 
     {% block styles %}
-        <link rel="stylesheet" href="/static/vendors/semantic/build/packaged/definitions/css/semantic.css">
+        <link rel="stylesheet" href="/static/vendors/semantic/semantic.css">
         <link rel="stylesheet" href="/static/dist/css/theme.css">
     {% endblock %}
 </head>
@@ -45,8 +45,8 @@
             'use strict';
             var locale = '{{ locale() }}';
         </script>
-        <script src="/static/vendors/jquery/dist/jquery.js"></script>
-        <script src="/static/vendors/semantic/build/packaged/definitions/javascript/semantic.js"></script>
+        <script src="/static/vendors/jquery/jquery.js"></script>
+        <script src="/static/vendors/semantic/semantic.js"></script>
         <script src="/static/dist/js/theme.js"></script>
     {% endblock %}
 
