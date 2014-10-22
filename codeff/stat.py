@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Algorithm
 #
 # 1. Get list of authors:
@@ -8,7 +6,7 @@
 # 2. Get list of not ignored files
 #    git ls-files
 #
-# 3. Get working days for every author (any day that has commits – is working day):
+# 3. Get working days for every author (any day that has commits => is working day):
 #    git log --date=short --pretty="format:%ad" --author=<author>
 #    (remove duplicates)
 #
@@ -27,56 +25,40 @@
 #    potential LOC = author LOC per day * total working days
 #    efficiency in team = potential LOC / min potential LOC
 
-
-import os
-import re
-import subprocess
 import fnmatch
 
 from collections import OrderedDict
 
-
-def execute_in_shell(cmd, cwd=None):
-    result = []
-    if cwd:
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=cwd)
-    else:
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    for line in p.stdout.readlines():
-        result.append(line.rstrip(os.linesep))  # decode("utf-8").
-    p.wait()
-    return result
+from .gitapi import GitAPI
 
 
-def get_authors_stat(conf):
+def get_rate(conf):
+
+    API = GitAPI(repo_path=conf['repo_path'])
 
     team = {'loc': 0, 'days': 0, 'efficiency': 0}
 
-    # Check if folder is under git
-    result = execute_in_shell("find .git", cwd=conf['repo_path'])
-    if 'No such file or directory' in result:
-        exit('Folder is not under Git VCS')
-
     # Get list of authors
-    result = execute_in_shell("git log --format='%aN' | sort -u", cwd=conf['repo_path'])
-    authors = {item: {'loc': 0, 'days': 0, 'contribution': 0, 'efficiency': 0} for item in result}
+    authors = {item: {'loc': 0, 'days': 0, 'contribution': 0, 'efficiency': 0} for item in API.get_authors()}
+    print('authors', authors)
 
-    # Get list of files (except excluded from .gitignore)
-    files = execute_in_shell("git ls-files", cwd=conf['repo_path'])
-
-    if conf['ignore']:
-        for ignore in conf['ignore']:
+    # Get list of files, exclude ignored files
+    files = API.get_files()
+    if conf['ignore_pathes']:
+        for ignore in conf['ignore_pathes']:
             files = set(files) - set([file for file in files if fnmatch.fnmatchcase(file, ignore)])
     files = sorted(files)
+    print('files', files)
 
     # Get working days for every author
-    result = execute_in_shell("git log --date=short --pretty=\"format:%ad %an\" | sort | uniq", cwd=conf['repo_path'])
+    result = API.get_working_days(format="%ad %an")
     for author_name in authors:
         authors[author_name]['days'] = len([item for item in result if author_name in item])
+    print('authors', authors)
 
     # Get total working days
-    result = execute_in_shell("git log --date=short --pretty=\"format:%ad\" | sort | uniq", cwd=conf['repo_path'])
-    team['days'] = len(result)
+    team['days'] = len(API.get_working_days())
+    print('team', team)
 
     # Exclude authors that worked less then conf['min_days']
     authors = {author_name: author for author_name, author in authors.iteritems()
@@ -85,17 +67,17 @@ def get_authors_stat(conf):
     # Get author for every line in every file, add this to author statistic
     # Get total LOC
     for file in files:
-        result = execute_in_shell("git blame --line-porcelain {} | sed -n 's/^author //p' | sort | uniq -c | sort -rn".format(file), cwd=conf['repo_path'])
+        result = API.get_loc_per_author(file)
         for item in result:
             loc, author = item.strip().split(' ')[:2]
             if author in authors:
                 authors[author]['loc'] += int(loc)
             team['loc'] += int(loc)
 
-    # Exclude authors that created loc less then conf['min_loc']
+    # Exclude authors that created less LOC then conf['min_loc']
     authors = {author_name: author for author_name, author in authors.iteritems()
                                    if author['loc'] >= conf['min_loc']}
-
+    print('authors', authors)
     # Calculate team's efficiency
     team['efficiency'] = (float(team['loc']) / team['days']) / team['loc']
 
@@ -112,21 +94,21 @@ def get_authors_stat(conf):
     except ValueError:
         min_potential_loc = 0
 
+    # Calculate authors' efficiency
     if min_potential_loc:
         for author_name in authors:
             authors[author_name]['efficiency'] = potential_loc[author_name] / min_potential_loc
 
     authors = OrderedDict(sorted(authors.items(), key=lambda x: x[1]['efficiency'], reverse=True))
 
-    return team, authors
+    return {'team': team, 'authors': authors}
 
 
-# def translate(shell_regex):
-#     table = {
-#         '?': '.',
-#         '*': '[\w^/]+',
-#         '**': '[\w]+',
-#     }
-#     for k, v in table.iteritems():
-#         shell_regex = shell_regex.replace(k, v)
-#     return shell_regex
+def populate_config(form):
+    conf = {}
+    conf['repo_path'] = form['repo_path'].data
+    conf['ignore_pathes'] = form['ignore_pathes'].data.splitlines() if form['ignore_pathes'].data else []
+    conf['min_days'] = form['min_days'].data if form['min_days'].data else 0
+    conf['min_loc'] = form['min_loc'].data if form['min_loc'].data else 0
+    conf['anonym'] = True if form['anonym'].data else False
+    return conf
