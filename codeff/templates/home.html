@@ -6,16 +6,16 @@
 {% set seodescription = "Coders' Efficiency – Script create coders' efficiency rating by analyse git repository data." %}
 
 {% block main %}
-    <div class="ui page grid" style="margin-top: 30px;">
+    <div class="ui page grid" style="margin-top: 30px;margin-bottom: 30px;">
         <div class="row">
             <div class="column">
                 <h1 class="ui center aligned header">{{ pagetitle }}</h1>
                 <div class="ui segment">
                     <h2 class="ui header">Configuration</h2>
                     {{ form_errors(form) }}
-                    <form class="ui form configurations" action="{{ url_for('.home') }}" method="POST">
+                    <form class="ui form configurations" action="{{ url_for('.home') }}#rate" method="POST">
                         {{ form_field(form, form.repo_path) }}
-                        {{ form_field(form, form.ignore) }}
+                        {{ form_field(form, form.ignore_pathes) }}
                         <div class="two fields">
                             {{ form_field(form, form.min_days) }}
                             {{ form_field(form, form.min_loc) }}
@@ -24,7 +24,8 @@
                         {{ form.submit(class_="ui submit button") }}
                     </form>
 
-                    {% if authors %}
+                    {% if rate['authors'] %}
+                        <a id="rate"></a>
                         <div class="ui divider" style="margin-top: 40px; margin-bottom: 40px;"></div>
                         <h2 class="ui header">Rate</h2>
                         <table class="ui collapsing table">
@@ -38,9 +39,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for author_name, author in authors.iteritems() %}
+                                {% for author_name, author in rate['authors'].iteritems() %}
                                     <tr>
-                                        <td>{% if not conf['anonym'] %}{{ author_name }}{% else %}Coder {{ loop.index }}{% endif %}</td>
+                                        <td>{% if not form.anonym.data %}{{ author_name }}{% else %}Coder {{ loop.index }}{% endif %}</td>
                                         <td>{{ author['loc'] }}</td>
                                         <td>{{ author['days'] }}</td>
                                         <td>{{ '%0.2f' % (author['contribution']*100)|float }}%</td>

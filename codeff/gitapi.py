@@ -21,7 +21,7 @@ class GitAPI:
 
     def is_repo(self):
         result = self.execute_in_shell("find .git")
-        return False if 'No such file or directory' in result else True  # TODO: looks like a hack
+        return False if not result or 'No such file or directory' in result[0] else True  # TODO: looks like a hack
 
     def get_authors(self):
         return self.execute_in_shell("git log --format='%aN' | sort -u")
