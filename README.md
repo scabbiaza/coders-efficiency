@@ -5,24 +5,14 @@ Script create coders' efficiency rating by analyse git repository data.<br/>
 
 ## Example
 
-<pre>
-Author         LOC total     Working days        Contribution     Efficiency
-
-Coder 1            10362              124              33.79%            4.5
-Coder 2             9655              130              31.49%            4.0
-Coder 3             1250               28               4.08%            2.4
-Coder 4             2364               55               7.71%            2.3
-Coder 5             1403               55               4.58%            1.4
-Coder 6              177                9               0.58%            1.1
-Coder 7             1864              100               6.08%            1.0
-</pre>
+<img src="http://paqmind.com/temp/coders-efficiency/result.png"/>
 
 
 ## How it works
 
 #### What is coder's efficiency?
  
-Is it how many lines he adds? But if developer added to the project some outer library (jQuery for example), should it count? Or if other developer rewrote that code because it was not correct, should it count? So may be efficiency is how many lines he deletes? Even more confusing metric, right? How many commits he creates? Well, it's important but...
+Is it how many lines he adds? But if developer added to the project some outer library (jQuery for example), should it count? Or if other developer rewrote that code because it was not correct, should it count? So may be efficiency is how many lines he deletes? Even more confusing metric, isn't? How many commits he creates? Well, it's important but...
  
 The only thing that is really important is the **сode in release repository**.
 That code has survived and we can call it **effective**.
@@ -83,30 +73,7 @@ Still for the project all metrics are import.
 
 ## How to run
 
-At this moment this is very simple one-file script.
-Download it on your machine, update configurations (in `coders-efficiency.py` file) and run it:
-```
-python coders-efficiency.py
-```
-
-#### Configurations
-
-```python
-conf = {
-    'repo_path': None,
-    'ignore': ['*.md', 'exclude.py'],
-    'min_days': 0,
-    'min_loc': 100,
-    'anonym': True,
-}
-```
-
-`repo_path` – absolute path to your repo. Set `None` if you are going to run script from repo directory.<br/>
-`ignore` – folders and files to ignore. You can put here your dist folders and your vendors.<br/>
-`min_days` – coders that worked less will not show in result rating.<br/>
-`min_loc` – coders that created less LOC will not show in result rating.<br/>
-`anonym` - in this mode real coders' names will be replaced.<br/>
-
+[Will be added later]
 
 
 ## Inspired by
@@ -118,7 +85,7 @@ conf = {
 
 ## Contribution
 
-If you want to contribute to the project, this links could be useful for you:
+If you want to contribute to the project, these links could be useful for you:
 
 * [Git-log documentation](http://git-scm.com/docs/git-log)
 * [Working with pythonsubprocess](http://jimmyg.org/blog/2009/working-with-python-subprocess.html)
