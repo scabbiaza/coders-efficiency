@@ -44,7 +44,6 @@ class Statistic:
 
         # Get list of authors
         authors = {item: {'loc': 0, 'days': 0, 'contribution': 0, 'efficiency': 0} for item in API.get_authors()}
-
         # Get list of files, exclude ignored files
         files = API.get_files()
         if self.config['ignore_pathes']:
@@ -69,7 +68,10 @@ class Statistic:
         for file in files:
             result = API.get_loc_per_author(file)
             for item in result:
-                loc, author = item.strip().split(' ')[:2]
+                item = item.strip()
+                delimiter = item.find(' ')
+                loc  = item[:delimiter]
+                author = item[delimiter+1:]
                 if author in authors:
                     authors[author]['loc'] += int(loc)
                 team['loc'] += int(loc)
