@@ -22,10 +22,8 @@ def ignore_pathes_validate(form, field):
     if not ignore_pathes:
         return
     for path in ignore_pathes:
-        pass
-        # TODO: create list of valid values
-        # if not os.path.isdir(form.repo_path.data + path):
-        #     raise ValidationError('Path %s is not exist' % path)
+        if path[0] == '/':
+            raise ValidationError('Path %s is not relative' % path)
 
 
 def min_days_validate(form, field):
@@ -42,8 +40,7 @@ def min_loc_validate(form, field):
 
 class ConfigForm(Form):
     repo_path = StringField('Absolute path to the repository', [DataRequired('Field is required'), repo_path_validate])
-    ignore_pathes = TextAreaField('List of ignored folders and files', [ignore_pathes_validate],
-                                  description="Relative to the repo path. All folders and files from .gitignore are excluded automatically.")
+    ignore_pathes = TextAreaField('List of ignored folders and files', [ignore_pathes_validate])
     min_days = IntegerField('Minimal working days', [Optional(), min_days_validate])
     min_loc = IntegerField('Minimal LOC', [Optional(), min_loc_validate])
     anonym = BooleanField('Anonym mode')

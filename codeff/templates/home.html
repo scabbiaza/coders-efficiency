@@ -15,7 +15,29 @@
                     {{ form_errors(form) }}
                     <form class="ui form configurations" action="{{ url_for('.home') }}#rate" method="POST">
                         {{ form_field(form, form.repo_path) }}
-                        {{ form_field(form, form.ignore_pathes) }}
+                        <div class="ui grid">
+                            <div class="eight wide column">
+                                {{ form_field(form, form.ignore_pathes) }}
+                            </div>
+                            <div class="eight wide column">
+                                <br/>
+                                <p><small>
+                                    Add pathes as <strong>relative</strong> to the repo path.<br/>
+                                    All folders and files from .gitignore are excluded automatically.
+                                </small></p>
+                                <p><small>
+                                    You can use next patters:<br/>
+                                    * – matches everything<br/>
+                                    ? – matches any single character<br/>
+                                    [seq] – matches any character in seq<br/>
+                                    [!seq] – matches any character not in seq
+                                </small></p>
+{#                                <p><small>#}
+{#                                    For a literal match, wrap the meta-characters in brackets. For example, '[?]' matches the character '?'.#}
+{#                                </small></p>#}
+{#                                <br/>#}
+                            </div>
+                        </div><br/>
                         <div class="two fields">
                             {{ form_field(form, form.min_days) }}
                             {{ form_field(form, form.min_loc) }}
