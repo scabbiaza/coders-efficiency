@@ -66,8 +66,8 @@
                                         <td>{% if not form.anonym.data %}{{ author_name }}{% else %}Coder {{ loop.index }}{% endif %}</td>
                                         <td>{{ author['loc'] }}</td>
                                         <td>{{ author['days'] }}</td>
-                                        <td>{{ '%0.2f' % (author['contribution']*100)|float }}%</td>
-                                        <td>{{ author['efficiency'] }}</td>
+                                        <td>{{ '%0.2f' % (author['contribution']*100) | float }}%</td>
+                                        <td>{{ '%0.2f' % (author['efficiency']) }}</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
